@@ -1,0 +1,63 @@
+<html>
+<title>Settings - Katu Aurora</title>
+<link href="css/style.css" rel="stylesheet" type="text/css">
+<script src="js/chrome_local_data.js"></script>
+<script src="js/settings.js"></script>
+<body>
+
+    <div>
+        <div class="header_text">
+            Settings
+        </div>
+
+        <div class="line">
+
+        </div>
+
+        <div class="settings_content">
+
+            <div id="success_message">
+                Data Saved Successfully!
+            </div>
+            <div class="settings_data">
+
+                <div class="settings_data_left">
+                    Update Frequency:
+                </div>
+                <div class="settings_data_right">
+                    <select id="freq">
+                        <option value="900000">15 Minutes</option>
+                        <option value="1800000">30 Minutes</option>
+                        <option value="3600000">1 Hour</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="clear"></div>
+
+            <div class="settings_data">
+                <div class="settings_data_left">
+                    Select Region:
+                </div>
+                <div class="settings_data_right">
+                    <select id="region">
+                        <option value="eu">Europe</option>
+                        <option value="usa">USA</option>
+                        <option value="nz">New Zealand</option>
+                        <option value="ata">Antarctica</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="clear"></div>
+            <div class="settings_data">
+                <input type="button" id="save" value="Save" />&nbsp;&nbsp;&nbsp;
+                <input type="button" id="back" value="Back" />
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
