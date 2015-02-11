@@ -10,6 +10,7 @@ var Settings = function()
     var thisObject = this;
     var saveButton;
     var backButton;
+    var debugCheckbox;
     var freq;
     var region;
 
@@ -17,6 +18,8 @@ var Settings = function()
 
     this.init = function()
     {
+        debugCheckbox = document.getElementById("debug_id");
+
         saveButton = document.getElementById("save");
         saveButton.addEventListener("click", onSaveClickHandler);
 
@@ -47,6 +50,15 @@ var Settings = function()
             }
         });
 
+        localData.getLocalData(Key.DEBUG, function(data)
+        {
+            console.log("debug,  " + data);
+            if(data === true)
+            {
+                debugCheckbox.checked = true;
+            }
+        });
+
     };
 
     /**
@@ -59,8 +71,9 @@ var Settings = function()
         saveMessage.style.display = "none";
         var freqValue = freq[freq.selectedIndex].value;
         var regionValue = region[region.selectedIndex].value;
+        var debug = debugCheckbox.checked;
 
-        localData.storeData(freqValue, regionValue, function()
+        localData.storeData(freqValue, regionValue, debug, function()
         {
             //alert("data saved!");
             saveMessage.style.display = "block";

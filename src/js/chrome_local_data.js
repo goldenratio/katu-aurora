@@ -6,6 +6,7 @@ var Key = new function()
 {
     this.FREQUENCY = "frequency";
     this.REGION = "region";
+    this.DEBUG = "debug";
 };
 var ChromeLocalData = function(context)
 {
@@ -46,7 +47,7 @@ var ChromeLocalData = function(context)
 
     });
 
-    this.storeData = function(frequencyValue, regionValue, callback)
+    this.storeData = function(frequencyValue, regionValue, debug, callback)
     {
         if(!frequencyValue || !regionValue)
         {
@@ -54,9 +55,9 @@ var ChromeLocalData = function(context)
             return;
         }
 
-        console.log("freq = " + frequencyValue + ", region = " + regionValue);
+        console.log("freq = " + frequencyValue + ", region = " + regionValue + ", debug = "  + debug);
 
-        chrome.storage.local.set({ "frequency" : frequencyValue, "region" : regionValue }, function()
+        chrome.storage.local.set({ "frequency" : frequencyValue, "region" : regionValue, "debug": debug }, function()
         {
             console.log("data saved");
             if(callback)

@@ -3,13 +3,7 @@
  */
 
 
-var ENABLE_CONSOLE = false;
-
-if(ENABLE_CONSOLE == false)
-{
-    var console = console || {};
-    console.log = function() {};
-}
+var console = console || {};
 
 var Properties = new function()
 {
@@ -59,6 +53,14 @@ var NOAAService = function()
             clearTimeout(timer);
         }
         console.log("load..");
+        if(!navigator.onLine)
+        {
+            console.log("offline - no internet connection");
+            Badge.showText("ERR", true);
+            startLoadTimer();
+            return;
+        }
+
         request = new XMLHttpRequest();
         request.open("GET", dataURL, true);
         request.responseType = "text";
@@ -264,7 +266,7 @@ var Badge = new function()
 {
     var COLOR_QUIET = "#009966";
     var COLOR_ACTIVE = "#ffa800";
-    var COLOR_STORM = "#FF0000"
+    var COLOR_STORM = "#FF0000";
 
     this.show = function(data)
     {
@@ -296,6 +298,21 @@ var Badge = new function()
         chrome.browserAction.setBadgeBackgroundColor({color: selectedColor});
 
         text = "Kp" + space + kpValue;
+        chrome.browserAction.setBadgeText({text : text});
+    };
+
+    this.showText = function(text, isError)
+    {
+        if(text.length > 3)
+        {
+            return;
+        }
+        var selectedColor = "#009966";
+        if(isError)
+        {
+            selectedColor = "#ff0000";
+        }
+        chrome.browserAction.setBadgeBackgroundColor({color: selectedColor});
         chrome.browserAction.setBadgeText({text : text});
     }
 };
@@ -343,6 +360,20 @@ window.addEventListener("load", onLoadComplete);
 
 function onLoadComplete()
 {
+    localData.getLocalData(Key.DEBUG, function(data)
+    {
+        if(data === undefined || data === false)
+        {
+            console.log = function() {};
+        }
+
+        init();
+    });
+
+}
+
+function init()
+{
     localData.getLocalData(Key.REGION, function(data)
     {
         console.log("region,  " + data);
@@ -364,6 +395,4 @@ function onLoadComplete()
         });
 
     });
-
-
 }
