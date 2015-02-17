@@ -56,6 +56,7 @@ var NOAAService = function()
         if(!navigator.onLine)
         {
             console.log("offline - no internet connection");
+            isOfflineError = true;
             Badge.showText("ERR", true);
             startLoadTimer();
             return;
@@ -100,6 +101,7 @@ var NOAAService = function()
             return;
         }
 
+        isOfflineError = false;
         var data = this.responseText;
         thisObject.imageCache = null;
         // parse the text data
@@ -207,7 +209,7 @@ var NOAAService = function()
     {
         // notify popup
         //........
-        chrome.extension.sendMessage(new Object());
+        chrome.extension.sendMessage({});
 
 
         // load again..
@@ -351,12 +353,31 @@ var Utils = new function()
     };
 };
 
+var isOfflineError = false;
 var service = new NOAAService();
 var localData = new ChromeLocalData(service);
 
 
 
 window.addEventListener("load", onLoadComplete);
+
+window.addEventListener("online", onNavigatorOnline);
+window.addEventListener("offline", onNavigatorOffline);
+
+function onNavigatorOnline()
+{
+    console.log("bloody hell - online");
+    if(isOfflineError === true)
+    {
+        isOfflineError = false;
+        service.load();
+    }
+}
+
+function onNavigatorOffline()
+{
+    console.log("navigator went offline!!");
+}
 
 function onLoadComplete()
 {
