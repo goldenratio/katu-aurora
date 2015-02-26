@@ -17,10 +17,10 @@ var Enum = new function()
     this.STORM = "Storm";
 
     this.MAP = { "eu":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
-                  "usa":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
-                  "nz":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png",
-                  "ata":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png"
-                };
+        "usa":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
+        "nz":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png",
+        "ata":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png"
+    };
 };
 
 var localSettings = new function()

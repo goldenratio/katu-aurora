@@ -1,26 +1,26 @@
 {
-	"manifest_version": 2,
-    "name": "Katu Aurora - Space Weather",
-    "short_name": "Katu Aurora",
-	"description": "A Simple Aurora Notification tool. Notifies about Planetary Kp index and Oval Activity map.",
-	"version": "1.9",
-	"permissions": [ "http://*.noaa.gov/*", "storage" ],
+  "manifest_version": 2,
+  "name": "Katu Aurora - Space Weather",
+  "short_name": "Katu Aurora",
+  "description": "A Simple Aurora Notification tool. Notifies about Planetary Kp index and Oval Activity map.",
+  "version": "1.9",
+  "permissions": [ "http://*.noaa.gov/*", "storage" ],
 
-    "icons": {
-        "16": "assets/icon_16.png",
-        "48": "assets/icon_48.png",
-        "128": "assets/icon_128.png"
-    },
+  "icons": {
+    "16": "assets/icon_16.png",
+    "48": "assets/icon_48.png",
+    "128": "assets/icon_128.png"
+  },
 
-    "browser_action": {
-        "default_icon": "assets/icon_48.png",
-        "default_popup": "notification.html",
-        "default_title": "Katu Aurora"
-    },
+  "browser_action": {
+    "default_icon": "assets/icon_48.png",
+    "default_popup": "notification.html",
+    "default_title": "Katu Aurora"
+  },
 
-    "background": {
-        "scripts": ["js/chrome_local_data.js", "js/background.js"]
-    },
+  "background": {
+    "scripts": ["js/chrome_local_data.js", "js/background.js"]
+  },
 
-    "options_page": "settings.html"
+  "options_page": "settings.html"
 }
