@@ -3,7 +3,7 @@
   "name": "Katu Aurora - Space Weather",
   "short_name": "Katu Aurora",
   "description": "A Simple Aurora Notification tool. Notifies about Planetary Kp index and Oval Activity map.",
-  "version": "1.9",
+  "version": "2.0",
   "permissions": [ "http://*.noaa.gov/*", "storage" ],
 
   "icons": {
