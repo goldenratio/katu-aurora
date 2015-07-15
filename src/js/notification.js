@@ -111,7 +111,8 @@ var Notify = function()
     {
         if(activityContainer)
         {
-            var pctString = (pct <= 0) ? "" : pct.toString() + "%";
+            //var pctString = (pct <= 0) ? "" : pct.toString() + "%";
+            var pctString = pct.toString() + "%";
             activityContainer.innerHTML = "<br>&nbsp;Loading Auroral Oval Map.. " + pctString;
         }
 
