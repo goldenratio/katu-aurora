@@ -22,7 +22,6 @@ var Notify = function()
         }
 
         activityContainer = document.getElementById("activity");
-        //activityContainer.innerHTML = "";
         clearActivityContainer(true);
 
         kpInfo = document.getElementById("kp_info");
@@ -94,15 +93,28 @@ var Notify = function()
 
     var clearActivityContainer = function(showLoading)
     {
-        while (activityContainer.firstChild)
+        if(activityContainer)
         {
-            activityContainer.removeChild(activityContainer.firstChild);
+            while (activityContainer.firstChild)
+            {
+                activityContainer.removeChild(activityContainer.firstChild);
+            }
         }
 
         if(showLoading)
         {
-            activityContainer.innerHTML = "<br>&nbsp;Loading Auroral Oval Map..";
+            showLoadingMapText(0);
         }
+    };
+
+    var showLoadingMapText = function(pct)
+    {
+        if(activityContainer)
+        {
+            var pctString = (pct <= 0) ? "" : pct.toString() + "%";
+            activityContainer.innerHTML = "<br>&nbsp;Loading Auroral Oval Map.. " + pctString;
+        }
+
     };
 
     var onRefreshClick = function()
@@ -129,7 +141,18 @@ var Notify = function()
     {
         //console.log("message from bg script");
         backgroundPage = chrome.extension.getBackgroundPage();
-        displayNewData();
+        var imagePct = backgroundPage.service.imageDownLoadPercent;
+
+        console.log("imagePct " + imagePct);
+        if(imagePct >= 100)
+        {
+            displayNewData();
+        }
+        else
+        {
+            showLoadingMapText(imagePct);
+        }
+
     };
 
 

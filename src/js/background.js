@@ -38,7 +38,8 @@ var NOAAService = function()
 
     //this.dataList = [];
     this.selectedData;
-    this.imageCache;
+    this.imageCache = null;
+    this.imageDownLoadPercent = 0;
 
 
     var thisObject = this;
@@ -183,13 +184,26 @@ var NOAAService = function()
             loadNext();
             return;
         }
+
+        thisObject.imageDownLoadPercent = 0;
         request = new XMLHttpRequest();
         request.open("GET", localSettings.mapValue, true);
         request.responseType = "blob";
         request.send(null);
         request.onload = onImageLoadComplete;
         request.onerror = onError;
+        request.onprogress = onImageProgress;
         request.onreadystatechange = onStateChange;
+    };
+
+    var onImageProgress = function(event)
+    {
+        if(event.lengthComputable)
+        {
+            thisObject.imageDownLoadPercent = ((event.loaded / event.total) * 100) | 0;
+            console.log("percentComplete " + thisObject.imageDownLoadPercent);
+            chrome.extension.sendMessage({});
+        }
     };
 
     var onImageLoadComplete = function()
@@ -199,6 +213,7 @@ var NOAAService = function()
             return;
         }
 
+        thisObject.imageDownLoadPercent = 100;
         thisObject.imageCache = this.response;
         console.log("image blob loaded " + thisObject.imageCache);
 
