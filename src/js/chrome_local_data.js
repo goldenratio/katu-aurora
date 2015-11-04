@@ -9,48 +9,46 @@ var Key = {
     DEBUG: "debug"
 };
 
-var ChromeLocalData = (function(context)
+var ChromeLocalData = (function()
 {
     var thisObject;
 
-    function ChromeLocalData()
+    function ChromeLocalData(context)
     {
         // constructor
         thisObject = this;
         this.context = context;
+
+        chrome.storage.onChanged.addListener(function(changes, area)
+        {
+            console.log("local data changed! " + area);
+            //console.log(JSON.stringify(changes.frequency));
+
+            for (var key in changes)
+            {
+                console.log(key);
+
+                if(key == Key.FREQUENCY)
+                {
+                    console.log(changes[key]);
+                    if(thisObject.context)
+                        thisObject.context.onLocalDataChanged(key, changes[key].newValue);
+                }
+                else if(key == Key.REGION)
+                {
+                    if(thisObject.context)
+                        thisObject.context.onLocalDataChanged(key, changes[key].newValue);
+                }
+            }
+
+            if(thisObject && thisObject.context && thisObject.context.onLocalDataChangeFinish)
+            {
+                thisObject.context.onLocalDataChangeFinish();
+            }
+
+        });
+
     }
-
-    chrome.storage.onChanged.addListener(function(changes, area)
-    {
-        console.log("local data changed! " + area)
-        //console.log(JSON.stringify(changes.frequency));
-
-        for (var key in changes)
-        {
-            console.log(key);
-
-            if(key == Key.FREQUENCY)
-            {
-                console.log(changes[key]);
-                if(thisObject.context)
-                    thisObject.context.onLocalDataChanged(key, changes[key].newValue);
-            }
-            else if(key == Key.REGION)
-            {
-                if(thisObject.context)
-                    thisObject.context.onLocalDataChanged(key, changes[key].newValue);
-            }
-        }
-
-        if(thisObject && thisObject.context && thisObject.context.onLocalDataChangeFinish)
-        {
-            console.log("brrrr");
-            thisObject.context.onLocalDataChangeFinish();
-        }
-
-
-
-    });
 
     /**
      * Store Data

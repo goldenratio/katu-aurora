@@ -232,8 +232,13 @@ var NOAAService = (function()
         timer = setTimeout(service.load, localSettings.updateFrequency);
     };
 
-
-    this.onLocalDataChanged = function(key, value)
+    /**
+     * onLocalDataChanged
+     * @param key
+     * @param value
+     * @public
+     */
+    NOAAService.prototype.onLocalDataChanged = function(key, value)
     {
         console.log("bg, local data changed, " + key + ", " + value);
         if(key == Key.FREQUENCY)
@@ -248,7 +253,11 @@ var NOAAService = (function()
         }
     };
 
-    this.onLocalDataChangeFinish = function()
+    /**
+     * onLocalDataChangeFinish
+     * @public
+     */
+    NOAAService.prototype.onLocalDataChangeFinish = function()
     {
         console.log("onLocalDataChangeFinish");
         thisObject.load();

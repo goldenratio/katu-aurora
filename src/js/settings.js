@@ -4,10 +4,10 @@
  **/
 
 
-var Settings = function()
+var Settings = (function()
 {
 
-    var thisObject = this;
+    var thisObject;
     var saveButton;
     var backButton;
     var debugCheckbox;
@@ -16,7 +16,17 @@ var Settings = function()
 
     var saveMessage;
 
-    this.init = function()
+    function Settings()
+    {
+        // constructor
+        thisObject = this;
+    }
+
+    /**
+     * Init
+     * @public
+     */
+    Settings.prototype.init = function()
     {
         debugCheckbox = document.getElementById("debug_id");
 
@@ -35,8 +45,7 @@ var Settings = function()
             console.log("region,  " + data);
             if(data)
             {
-                var index = getIndexFromValue(data, region);
-                region.selectedIndex = index;
+                region.selectedIndex = getIndexFromValue(data, region);
             }
         });
 
@@ -45,8 +54,7 @@ var Settings = function()
             console.log("freq,  " + data);
             if(data)
             {
-                var index = getIndexFromValue(data, freq);
-                freq.selectedIndex = index;
+                freq.selectedIndex = getIndexFromValue(data, freq);
             }
         });
 
@@ -99,11 +107,30 @@ var Settings = function()
         return 0;
     };
 
-    this.onLocalDataChanged = function(key, value)
+    /**
+     * onLocalDataChanged
+     * @param key
+     * @param value
+     * @public
+     */
+    Settings.prototype.onLocalDataChanged = function(key, value)
     {
         console.log("settings, local data change");
     };
-};
+
+    /**
+     * onLocalDataChangeFinish
+     * @param key
+     * @param value
+     * @public
+     */
+    Settings.prototype.onLocalDataChangeFinish = function(key, value)
+    {
+        console.log("settings, onLocalDataChangeFinish");
+    };
+
+    return Settings;
+})();
 
 var settings = new Settings();
 var localData = new ChromeLocalData(settings);
