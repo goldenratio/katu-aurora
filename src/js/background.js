@@ -232,14 +232,12 @@ var NOAAService = function()
     };
 
 
-
     this.onLocalDataChanged = function(key, value)
     {
         console.log("bg, local data changed, " + key + ", " + value);
         if(key == Key.FREQUENCY)
         {
             localSettings.updateFrequency = value;
-            //thisObject.load();
         }
 
         if(key == Key.REGION)
@@ -301,8 +299,7 @@ var Badge = {
             selectedColor = Badge._COLOR_STORM;
         }
 
-        var title = data.result;
-        title = Enum.TITLE + " - " + title;
+        var title = Enum.TITLE + " - " + data.result;
         var text = "Kp" + space + kpValue;
 
         chrome.browserAction.setTitle({title : title});
@@ -313,6 +310,8 @@ var Badge = {
 
     showError: function()
     {
+        var title = Enum.TITLE + " - Error";
+        chrome.browserAction.setTitle({title : title});
         chrome.browserAction.setBadgeBackgroundColor({color: "#ff0000"});
         chrome.browserAction.setBadgeText({text : "ERR"});
     }

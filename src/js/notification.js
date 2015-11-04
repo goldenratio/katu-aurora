@@ -11,7 +11,7 @@ var Notify = function()
     var kpInfo;
     var timer;
 
-    var displayNewData = function()
+    var displayNewData = function(isSuccess)
     {
         clearTimeout(timer);
         var mapValue = backgroundPage.localSettings.mapValue;
@@ -26,8 +26,8 @@ var Notify = function()
 
         kpInfo = document.getElementById("kp_info");
         var data = backgroundPage.service.selectedData;
-        var refreshButton;
-        refreshButton = document.getElementById("refresh");
+        var refreshButton = document.getElementById("refresh");
+
         if(refreshButton)
         {
             refreshButton.removeEventListener("click", onRefreshClick, false);
@@ -39,7 +39,7 @@ var Notify = function()
         var result = "ERR";
         var timeDifference = -1;
 
-        if(data)
+        if(isSuccess && data)
         {
             if(data.kp >= 0)
             {
@@ -105,12 +105,9 @@ var Notify = function()
                 var img = document.createElement("img");
                 img.onload = function(event)
                 {
-                    //activityContainer.innerHTML = "";
                     clearActivityContainer(false);
-
-                    //activityContainer.style.backgroundImage = "url("+mapValue+")";
                     activityContainer.appendChild(img);
-                    //console.log("event.target.src " + event.target.src);
+
                     URL.revokeObjectURL(event.target.src);
                 };
                 img.setAttribute("src", URL.createObjectURL(mapBlob));
@@ -172,7 +169,7 @@ var Notify = function()
 
     this.init = function()
     {
-        displayNewData();
+        displayNewData(true);
         chrome.extension.onMessage.addListener(onMessage);
 
     };
@@ -199,7 +196,7 @@ var Notify = function()
         switch (data.type)
         {
             case messageType.IO_ERROR:
-                displayNewData();
+                displayNewData(false);
                 break;
 
             case messageType.IMAGE_PROGRESS:
@@ -207,7 +204,7 @@ var Notify = function()
                 break;
 
             case messageType.IMAGE_COMPLETE:
-                displayNewData();
+                displayNewData(true);
                 break;
         }
     };
