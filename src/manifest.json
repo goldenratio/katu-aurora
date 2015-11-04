@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 2.1,
   "name": "Katu Aurora - Space Weather",
   "short_name": "Katu Aurora",
   "description": "A Simple Aurora Notification tool. Notifies about Planetary Kp index and Oval Activity map.",
