@@ -2,16 +2,27 @@
  * @author: Karthik VJ
  **/
 
-var Notify = function()
+var Notify = (function()
 {
 
-    var thisObject = this;
+    var thisObject;
 
     var activityContainer;
     var kpInfo;
     var timer;
 
-    var displayNewData = function(isSuccess)
+    function Notify()
+    {
+        // constructor
+        thisObject = this;
+    }
+
+    /**
+     * Display new data
+     * @param isSuccess
+     * @public
+     */
+    Notify.prototype.displayNewData = function(isSuccess)
     {
         clearTimeout(timer);
         var mapValue = backgroundPage.localSettings.mapValue;
@@ -136,11 +147,16 @@ var Notify = function()
 
         if(showLoading)
         {
-            showLoadingMapText(0);
+            thisObject.showLoadingMapText(0);
         }
     };
 
-    var showLoadingMapText = function(pct)
+    /**
+     * Show loading percentage text
+     * @param pct
+     * @public
+     */
+    Notify.prototype.showLoadingMapText = function(pct)
     {
         if(activityContainer)
         {
@@ -167,59 +183,54 @@ var Notify = function()
         return false;
     };
 
-    this.init = function()
-    {
-        displayNewData(true);
-        chrome.extension.onMessage.addListener(onMessage);
-
-    };
-
-    /**
-     * Invoked when Background js sends new Kp data
-     * @param data
-     * @param sender
-     * @param response
-     */
-    var onMessage = function(data, sender, response)
-    {
-        console.log("message from bg script, data " + data.type);
-        if(!data || !data.type)
-        {
-            console.log("unknown data message");
-            return;
-        }
-
-        backgroundPage = chrome.extension.getBackgroundPage();
-        var messageType = backgroundPage.ChromeMessage.messageType;
-        var service = backgroundPage.service;
-
-        switch (data.type)
-        {
-            case messageType.IO_ERROR:
-                displayNewData(false);
-                break;
-
-            case messageType.IMAGE_PROGRESS:
-                showLoadingMapText(service.imageDownLoadPercent);
-                break;
-
-            case messageType.IMAGE_COMPLETE:
-                displayNewData(true);
-                break;
-        }
-    };
-
-
-};
+    return Notify;
+})();
 
 
 var notify = new Notify();
 var backgroundPage = chrome.extension.getBackgroundPage();
 
 window.addEventListener("load", onLoadComplete);
+chrome.extension.onMessage.addListener(onMessage);
 
 function onLoadComplete()
 {
     //console.log("load complete!");
-    notify.init();
+    // init
+    notify.displayNewData(true);
+}
+
+/**
+ * Invoked when Background js sends new Kp data
+ * @param data
+ * @param sender
+ * @param response
+ */
+function onMessage(data, sender, response)
+{
+    console.log("message from bg script, data " + data.type);
+    if(!notify || !data || !data.type)
+    {
+        console.log("unknown data message");
+        return;
+    }
+
+    backgroundPage = chrome.extension.getBackgroundPage();
+    var messageType = backgroundPage.ChromeMessage.messageType;
+    var service = backgroundPage.service;
+
+    switch (data.type)
+    {
+        case messageType.IO_ERROR:
+            notify.displayNewData(false);
+            break;
+
+        case messageType.IMAGE_PROGRESS:
+            notify.showLoadingMapText(service.imageDownLoadPercent);
+            break;
+
+        case messageType.IMAGE_COMPLETE:
+            notify.displayNewData(true);
+            break;
+    }
 }

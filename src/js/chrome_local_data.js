@@ -2,18 +2,23 @@
  * @author: Karthik VJ
  **/
 
-var Key = new function()
-{
-    this.FREQUENCY = "frequency";
-    this.REGION = "region";
-    this.DEBUG = "debug";
+var Key = {
+
+    FREQUENCY: "frequency",
+    REGION: "region",
+    DEBUG: "debug"
 };
-var ChromeLocalData = function(context)
+
+var ChromeLocalData = (function(context)
 {
+    var thisObject;
 
-    var thisObject = this;
-    this.context = context;
-
+    function ChromeLocalData()
+    {
+        // constructor
+        thisObject = this;
+        this.context = context;
+    }
 
     chrome.storage.onChanged.addListener(function(changes, area)
     {
@@ -47,7 +52,14 @@ var ChromeLocalData = function(context)
 
     });
 
-    this.storeData = function(frequencyValue, regionValue, debug, callback)
+    /**
+     * Store Data
+     * @param frequencyValue
+     * @param regionValue
+     * @param debug
+     * @param callback
+     */
+    ChromeLocalData.prototype.storeData = function(frequencyValue, regionValue, debug, callback)
     {
         if(!frequencyValue || !regionValue)
         {
@@ -69,7 +81,12 @@ var ChromeLocalData = function(context)
 
     };
 
-    this.getLocalData = function(key, callback)
+    /**
+     * Get local data
+     * @param key
+     * @param callback
+     */
+    ChromeLocalData.prototype.getLocalData = function(key, callback)
     {
         chrome.storage.local.get(function(item)
         {
@@ -87,7 +104,7 @@ var ChromeLocalData = function(context)
     /**
      * Clear local storage data
      */
-    this.clear = function()
+    ChromeLocalData.prototype.clear = function()
     {
         chrome.storage.local.clear(function(callback)
         {
@@ -100,5 +117,5 @@ var ChromeLocalData = function(context)
     };
 
     //this.clear();
-
-};
+    return ChromeLocalData;
+})();

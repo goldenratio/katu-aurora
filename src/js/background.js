@@ -26,19 +26,14 @@ var localSettings = {
     mapValue: null
 };
 
-var NOAAService = function()
+var NOAAService = (function()
 {
-    var dataURL = "http://services.swpc.noaa.gov/text/wing-kp.txt";
-
-    this.selectedData = null;
-    this.imageCache = null;
-    this.imageDownLoadPercent = 0;
-
-    var thisObject = this;
+    var thisObject;
     var timer;
     var request;
 
     var CONSTS = {
+        DATA_URL: "http://services.swpc.noaa.gov/text/wing-kp.txt",
         DATA_START_INDEX: 16,
         DATA_ROW_LENGTH: 15,
         KP_INDEX: 14,
@@ -46,8 +41,20 @@ var NOAAService = function()
         KP_4HR_INDEX: 13
     };
 
+    function NOAAService()
+    {
+        // constructor
+        thisObject = this;
+        this.selectedData = null;
+        this.imageCache = null;
+        this.imageDownLoadPercent = 0;
+    }
 
-    this.load = function()
+    /**
+     * Load service
+     * @public
+     */
+    NOAAService.prototype.load = function()
     {
         if(timer)
         {
@@ -63,7 +70,7 @@ var NOAAService = function()
         }
 
         request = new XMLHttpRequest();
-        request.open("GET", dataURL, true);
+        request.open("GET", CONSTS.DATA_URL, true);
         request.responseType = "text";
         request.send(null);
         request.onload = onLoad;
@@ -150,12 +157,6 @@ var NOAAService = function()
             break;
         }
 
-        //console.log(thisObject.dataList);
-        //console.log("total records, " + thisObject.dataList.length);
-
-        // send the latest data to pop up.
-        //console.log(thisObject.dataList[thisObject.dataList.length - 1]);
-        //thisObject.selectedData = thisObject.dataList[thisObject.dataList.length - 1];
         console.log(thisObject.selectedData);
         Badge.show(thisObject.selectedData);
 
@@ -253,17 +254,28 @@ var NOAAService = function()
         thisObject.load();
     };
 
-};
+    return NOAAService;
+})();
 
-var AuroraData = function()
+
+var AuroraData = (function()
 {
-    this.kp;
-    this.kp_oneHour;
-    this.kp_fourHour;
-    this.timeStamp;
-    this.result;
-};
+    function AuroraData()
+    {
+        // constructor
+        this.kp;
+        this.kp_oneHour;
+        this.kp_fourHour;
+        this.timeStamp;
+        this.result;
+    }
 
+    return AuroraData;
+})();
+
+/**
+ * Display badge text
+ */
 var Badge = {
     _COLOR_QUIET: "#009966",
     _COLOR_ACTIVE: "#ffa800",
@@ -317,6 +329,9 @@ var Badge = {
     }
 };
 
+/**
+ * Utils
+ */
 var Utils = {
 
     parseTimeStamp : function(data)
@@ -352,6 +367,9 @@ var Utils = {
 };
 
 
+/**
+ * Chrome's runtime.sendMessage helper
+ */
 var ChromeMessage = {
     messageType : {
         IO_ERROR: "ioError",
@@ -367,11 +385,13 @@ var ChromeMessage = {
 
     sendImageProgress: function()
     {
+        console.log(">> sendImageProgress");
         chrome.runtime.sendMessage({type: ChromeMessage.messageType.IMAGE_PROGRESS});
     },
 
     sendImageLoadComplete: function()
     {
+        console.log(">> sendImageLoadComplete");
         chrome.runtime.sendMessage({type: ChromeMessage.messageType.IMAGE_COMPLETE});
     }
 };
@@ -393,7 +413,11 @@ function onNavigatorOnline()
     if(isOfflineError == true)
     {
         isOfflineError = false;
-        service.load();
+
+        window.setTimeout(function(){
+            service.load();
+        }, 2000);
+
     }
 }
 
