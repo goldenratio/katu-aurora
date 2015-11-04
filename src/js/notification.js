@@ -33,18 +33,33 @@ var Notify = function()
             refreshButton.removeEventListener("click", onRefreshClick, false);
         }
 
-        var kp = 0;
-        var kp_oneHour = 0;
-        var kp_fourHour = 0;
+        var kp = "no data";
+        var kp_oneHour = "no data";
+        var kp_fourHour = "no data";
         var result = "ERR";
         var timeDifference = -1;
 
         if(data)
         {
-            kp = data.kp;
-            kp_oneHour = data.kp_oneHour;
-            kp_fourHour = data.kp_fourHour;
-            result = data.result;
+            if(data.kp >= 0)
+            {
+                kp = data.kp.toString();
+            }
+
+            if(data.kp_oneHour >= 0)
+            {
+                kp_oneHour = data.kp_oneHour.toString();
+            }
+
+            if(data.kp_fourHour >= 0)
+            {
+                kp_fourHour = data.kp_fourHour.toString();
+            }
+
+            if(data.result)
+            {
+                result = data.result;
+            }
 
             var today = new Date();
             timeDifference =  Math.floor((today.getTime() - data.timeStamp.getTime()) / 60000);

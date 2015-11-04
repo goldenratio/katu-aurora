@@ -133,16 +133,6 @@ var NOAAService = function()
                 continue;
             }
 
-            if(auroraData.kp_oneHour < 0)
-            {
-                auroraData.kp_oneHour = 0;
-            }
-
-            if(auroraData.kp_fourHour < 0)
-            {
-                auroraData.kp_fourHour = 0;
-            }
-
             if(Math.round(auroraData.kp) <= 3)
             {
                 auroraData.result = Enum.QUIET;
