@@ -5,46 +5,46 @@
 
 var console = console || {};
 
-var Properties = new function()
-{
-    this.title = "Katu Aurora";
-};
+var Enum = {
 
-var Enum = new function()
-{
-    this.QUIET = "Quiet";
-    this.ACTIVE = "Active";
-    this.STORM = "Storm";
+    TITLE: "Katu Aurora",
 
-    this.MAP = { "eu":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
+    QUIET: "Quiet",
+    ACTIVE: "Active",
+    STORM: "Storm",
+
+    MAP: {
+        "eu":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
         "usa":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
         "nz":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png",
         "ata":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png"
-    };
+    }
 };
 
-var localSettings = new function()
-{
-
-    this.updateFrequency = 900000; // in milliseconds (default 15 mins)
-    this.mapValue;
+var localSettings = {
+    updateFrequency: 900000, // in milliseconds (default 15 mins)
+    mapValue: null
 };
 
 var NOAAService = function()
 {
     var dataURL = "http://services.swpc.noaa.gov/text/wing-kp.txt";
-    var separator = "        ";
-    var sep_2 = "   ";
 
-    //this.dataList = [];
-    this.selectedData;
+    this.selectedData = null;
     this.imageCache = null;
     this.imageDownLoadPercent = 0;
-
 
     var thisObject = this;
     var timer;
     var request;
+
+    var CONSTS = {
+        DATA_START_INDEX: 16,
+        DATA_ROW_LENGTH: 15,
+        KP_INDEX: 14,
+        KP_1HR_INDEX: 8,
+        KP_4HR_INDEX: 13
+    };
 
 
     this.load = function()
@@ -54,12 +54,11 @@ var NOAAService = function()
             clearTimeout(timer);
         }
         console.log("load..");
+
         if(!navigator.onLine)
         {
             console.log("offline - no internet connection");
-            isOfflineError = true;
-            Badge.showText("ERR", true);
-            startLoadTimer();
+            onError();
             return;
         }
 
@@ -77,28 +76,28 @@ var NOAAService = function()
     {
         if(this.readyState == 4 && this.status == 404)
         {
-            console.log("error loading data from NOAA");
-            startLoadTimer();
+            console.log("onStateChange, error loading data from NOAA");
+            onError();
         }
-
-
     };
 
     var onError = function()
     {
         console.log("onError >> load error");
-        startLoadTimer();
+        if(!navigator.onLine)
+        {
+            isOfflineError = true;
+        }
 
+        ChromeMessage.sendError();
+        Badge.showError();
+        startLoadTimer();
     };
 
     var onLoad = function()
     {
-        //console.log(this.status);
-        if(this.status == 404)
+        if(this.status != 200)
         {
-            //loadNext();
-            console.log("onLoad error");
-            startLoadTimer();
             return;
         }
 
@@ -108,56 +107,57 @@ var NOAAService = function()
         // parse the text data
         //thisObject.dataList = [];
         data = data.split("\n");
-        data.splice(0, 20);
+        data.splice(0, CONSTS.DATA_START_INDEX);
 
-        for(var i = data.length - 1; i >= 0; i--)
+        var dataLen = data.length;
+        for(var i = dataLen - 1; i >= 0; i--)
         {
-            //console.log(data[i]);
-            var item = data[i].split(separator);
-            if(item.length < 2)
+            var rowData = data[i];
+            // remove duplicate whitespace
+            rowData = rowData.replace(/\s+/g, ' '); // .trim() doesn't seem to work :(
+            var item = rowData.split(' ');
+
+            if(item.length != CONSTS.DATA_ROW_LENGTH)
             {
                 continue;
             }
+
             var auroraData = new AuroraData();
-            auroraData.kp = item[1];
-            var subData = item[0].split(sep_2);
-            //console.log(subData);
-            for(var j = 0; j < subData.length; j++)
-            {
-                // time stamp from NOAA
-                //auroraData.timeStamp = Utils.parseTimeStamp(subData[0]);
-                auroraData.timeStamp = new Date(Date.now());
-                auroraData.status = subData[1];
-                auroraData.kp_oneHour = subData[3].substr(2);
-                auroraData.kp_fourHour = subData[8];
+            auroraData.timeStamp = new Date(Date.now());
+            auroraData.kp = item[CONSTS.KP_INDEX];
+            auroraData.kp_oneHour = item[CONSTS.KP_1HR_INDEX];
+            auroraData.kp_fourHour = item[CONSTS.KP_4HR_INDEX];
 
-                if(Math.round(auroraData.kp) <= 3)
-                {
-                    auroraData.result = Enum.QUIET;
-                }
-                else if(Math.round(auroraData.kp) == 4)
-                {
-                    auroraData.result = Enum.ACTIVE;
-                }
-                else
-                {
-                    auroraData.result = Enum.STORM;
-                }
-            }
-            // check for data status
-            // Status(S): 0 = nominal solar wind input data,
-            //            1 = data are good but required an extrapolation
-            //            2 = data are bad: incomplete ACE speed data
-            //            3 = data are bad: solar wind speed input errors; model output likely unreliable
-            //            4 = missing Wing Kp data
-            if(auroraData.status == 0 || auroraData.status == 1)
+            if(auroraData.kp < 0)
             {
-                //thisObject.dataList.push(auroraData);
-                thisObject.selectedData = auroraData;
-                break;
+                continue;
             }
 
+            if(auroraData.kp_oneHour < 0)
+            {
+                auroraData.kp_oneHour = 0;
+            }
 
+            if(auroraData.kp_fourHour < 0)
+            {
+                auroraData.kp_fourHour = 0;
+            }
+
+            if(Math.round(auroraData.kp) <= 3)
+            {
+                auroraData.result = Enum.QUIET;
+            }
+            else if(Math.round(auroraData.kp) == 4)
+            {
+                auroraData.result = Enum.ACTIVE;
+            }
+            else
+            {
+                auroraData.result = Enum.STORM;
+            }
+
+            thisObject.selectedData = auroraData;
+            break;
         }
 
         //console.log(thisObject.dataList);
@@ -201,8 +201,8 @@ var NOAAService = function()
         if(event.lengthComputable)
         {
             thisObject.imageDownLoadPercent = ((event.loaded / event.total) * 100) | 0;
-            console.log("percentComplete " + thisObject.imageDownLoadPercent);
-            chrome.extension.sendMessage({});
+            //console.log("percentComplete " + thisObject.imageDownLoadPercent);
+            ChromeMessage.sendImageProgress();
         }
     };
 
@@ -224,8 +224,7 @@ var NOAAService = function()
     {
         // notify popup
         //........
-        chrome.extension.sendMessage({});
-
+        ChromeMessage.sendImageLoadComplete();
 
         // load again..
         startLoadTimer();
@@ -257,7 +256,6 @@ var NOAAService = function()
         {
             // update popup
             localSettings.mapValue = Enum.MAP[value];
-            //chrome.extension.sendMessage(new Object());
         }
     };
 
@@ -275,21 +273,24 @@ var AuroraData = function()
     this.kp_oneHour;
     this.kp_fourHour;
     this.timeStamp;
-    this.status;
     this.result;
 };
 
-var Badge = new function()
-{
-    var COLOR_QUIET = "#009966";
-    var COLOR_ACTIVE = "#ffa800";
-    var COLOR_STORM = "#FF0000";
+var Badge = {
+    _COLOR_QUIET: "#009966",
+    _COLOR_ACTIVE: "#ffa800",
+    _COLOR_STORM: "#FF0000",
 
-    this.show = function(data)
+    show: function(data)
     {
+        if(!data || !data.kp)
+        {
+            console.log("cannot show value in badge, data is null!");
+            this.showError();
+            return;
+        }
         var kpValue = Math.round(data.kp);
-        var title = data.result;
-        var selectedColor = COLOR_QUIET;
+        var selectedColor = Badge._COLOR_QUIET;
         var space = " ";
 
         if(kpValue > 9)
@@ -297,46 +298,39 @@ var Badge = new function()
             space = "";
         }
 
-        if(kpValue <= 3)
+        if(data.result == Enum.QUIET)
         {
-            selectedColor = COLOR_QUIET;
+            selectedColor = Badge._COLOR_QUIET;
         }
-        else if(kpValue == 4)
+        else if(data.result == Enum.ACTIVE)
         {
-            selectedColor = COLOR_ACTIVE;
+            selectedColor = Badge._COLOR_ACTIVE;
         }
-        else
+        else if(data.result == Enum.STORM)
         {
-            selectedColor = COLOR_STORM;
+            selectedColor = Badge._COLOR_STORM;
         }
 
-        title = Properties.title + " - " + title;
+        var title = data.result;
+        title = Enum.TITLE + " - " + title;
+        var text = "Kp" + space + kpValue;
+
         chrome.browserAction.setTitle({title : title});
         chrome.browserAction.setBadgeBackgroundColor({color: selectedColor});
-
-        text = "Kp" + space + kpValue;
         chrome.browserAction.setBadgeText({text : text});
-    };
+    },
 
-    this.showText = function(text, isError)
+
+    showError: function()
     {
-        if(text.length > 3)
-        {
-            return;
-        }
-        var selectedColor = "#009966";
-        if(isError)
-        {
-            selectedColor = "#ff0000";
-        }
-        chrome.browserAction.setBadgeBackgroundColor({color: selectedColor});
-        chrome.browserAction.setBadgeText({text : text});
+        chrome.browserAction.setBadgeBackgroundColor({color: "#ff0000"});
+        chrome.browserAction.setBadgeText({text : "ERR"});
     }
 };
 
-var Utils = new function()
-{
-    this.parseTimeStamp = function(data)
+var Utils = {
+
+    parseTimeStamp : function(data)
     {
         var data = data.split("  ");
         var year;
@@ -365,7 +359,32 @@ var Utils = new function()
 
         var d = Date.UTC(year, month, day, hours, minutes);
         return new Date(d);
-    };
+    }
+};
+
+
+var ChromeMessage = {
+    messageType : {
+        IO_ERROR: "ioError",
+        IMAGE_PROGRESS: "imageProgress",
+        IMAGE_COMPLETE: "imageComplete"
+    },
+
+    sendError: function()
+    {
+        console.log(">> sendError");
+        chrome.runtime.sendMessage({type: ChromeMessage.messageType.IO_ERROR});
+    },
+
+    sendImageProgress: function()
+    {
+        chrome.runtime.sendMessage({type: ChromeMessage.messageType.IMAGE_PROGRESS});
+    },
+
+    sendImageLoadComplete: function()
+    {
+        chrome.runtime.sendMessage({type: ChromeMessage.messageType.IMAGE_COMPLETE});
+    }
 };
 
 var isOfflineError = false;
@@ -382,7 +401,7 @@ window.addEventListener("offline", onNavigatorOffline);
 function onNavigatorOnline()
 {
     console.log("bloody hell - online");
-    if(isOfflineError === true)
+    if(isOfflineError == true)
     {
         isOfflineError = false;
         service.load();

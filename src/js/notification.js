@@ -33,35 +33,52 @@ var Notify = function()
             refreshButton.removeEventListener("click", onRefreshClick, false);
         }
 
+        var kp = 0;
+        var kp_oneHour = 0;
+        var kp_fourHour = 0;
+        var result = "ERR";
+        var timeDifference = -1;
+
         if(data)
         {
-            //console.log(data);
-            kpInfo.innerHTML = "Now: Kp = " + data.kp + " (" + data.result + ") &nbsp;<a href='http://www.spaceweather.com/glossary/kp.html' target='_blank' class='sunshine' title='Relationship between Kp and the Aurora'>explanation</a><div class='gap'></div>";
-            kpInfo.innerHTML += "<span class='smallText'>1-hour Prediction: Kp = " + data.kp_oneHour + "</span><br>";
-            kpInfo.innerHTML += "<span class='smallText'>4-hours Prediction: Kp = " + data.kp_fourHour + "</span><br><br>";
+            kp = data.kp;
+            kp_oneHour = data.kp_oneHour;
+            kp_fourHour = data.kp_fourHour;
+            result = data.result;
 
-            var dateText = "";
             var today = new Date();
-            var difference =  Math.floor((today.getTime() - data.timeStamp.getTime()) / 60000);
-
-            if(difference === 0)
-            {
-                dateText = "just now";
-            }
-            else if(difference === 1)
-            {
-                dateText = "1 minute ago";
-            }
-            else
-            {
-                dateText = difference.toString() + " minutes ago";
-            }
-
-            kpInfo.innerHTML += "<span class='smallerText'>Updated: " + dateText + " <a href='#' id='refresh' title='Refresh'>(refresh)</a></a> " +  "</span>";
-
-            refreshButton = document.getElementById("refresh");
-            refreshButton.addEventListener("click", onRefreshClick, false);
+            timeDifference =  Math.floor((today.getTime() - data.timeStamp.getTime()) / 60000);
         }
+
+        //console.log(data);
+        kpInfo.innerHTML = "Now: Kp = " + kp + " (" + result + ") &nbsp;<a href='http://www.spaceweather.com/glossary/kp.html' target='_blank' class='sunshine' title='Relationship between Kp and the Aurora'>explanation</a><div class='gap'></div>";
+        kpInfo.innerHTML += "<span class='smallText'>1-hour Prediction: Kp = " + kp_oneHour + "</span><br>";
+        kpInfo.innerHTML += "<span class='smallText'>4-hours Prediction: Kp = " + kp_fourHour + "</span><br><br>";
+
+        var dateText = "";
+
+        if(timeDifference == -1)
+        {
+            dateText = "Error";
+        }
+        else if(timeDifference === 0)
+        {
+            dateText = "just now";
+        }
+        else if(timeDifference === 1)
+        {
+            dateText = "1 minute ago";
+        }
+        else
+        {
+            dateText = timeDifference.toString() + " minutes ago";
+        }
+
+        kpInfo.innerHTML += "<span class='smallerText'>Updated: " + dateText + " <a href='#' id='refresh' title='Refresh'>(refresh)</a></a> " +  "</span>";
+
+        refreshButton = document.getElementById("refresh");
+        refreshButton.addEventListener("click", onRefreshClick, false);
+
 
         var mapBlob = backgroundPage.service.imageCache;
         if(mapBlob)
@@ -86,6 +103,10 @@ var Notify = function()
                 img.setAttribute("height", "450px");
 
             }, 100);
+        }
+        else
+        {
+            showErrorMapText();
         }
 
 
@@ -118,6 +139,15 @@ var Notify = function()
 
     };
 
+    var showErrorMapText = function()
+    {
+        if(activityContainer)
+        {
+            activityContainer.innerHTML = "<br>&nbsp;Error loading map :'(";
+        }
+
+    };
+
     var onRefreshClick = function()
     {
         clearActivityContainer(true);
@@ -140,20 +170,31 @@ var Notify = function()
      */
     var onMessage = function(data, sender, response)
     {
-        //console.log("message from bg script");
+        console.log("message from bg script, data " + data.type);
+        if(!data || !data.type)
+        {
+            console.log("unknown data message");
+            return;
+        }
+
         backgroundPage = chrome.extension.getBackgroundPage();
-        var imagePct = backgroundPage.service.imageDownLoadPercent;
+        var messageType = backgroundPage.ChromeMessage.messageType;
+        var service = backgroundPage.service;
 
-        console.log("imagePct " + imagePct);
-        if(imagePct >= 100)
+        switch (data.type)
         {
-            displayNewData();
-        }
-        else
-        {
-            showLoadingMapText(imagePct);
-        }
+            case messageType.IO_ERROR:
+                displayNewData();
+                break;
 
+            case messageType.IMAGE_PROGRESS:
+                showLoadingMapText(service.imageDownLoadPercent);
+                break;
+
+            case messageType.IMAGE_COMPLETE:
+                displayNewData();
+                break;
+        }
     };
 
 
