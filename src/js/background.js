@@ -425,7 +425,7 @@ function onNavigatorOnline()
 
         window.setTimeout(function(){
             service.load();
-        }, 2000);
+        }, 5000);
 
     }
 }
