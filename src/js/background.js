@@ -14,10 +14,10 @@ var Enum = {
     STORM: "Storm",
 
     MAP: {
-        "eu":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
-        "usa":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.png",
-        "nz":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png",
-        "ata":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.png"
+        "eu":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg",
+        "usa":"http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg",
+        "nz":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.jpg",
+        "ata":"http://services.swpc.noaa.gov/images/aurora-forecast-southern-hemisphere.jpg"
     }
 };
 
